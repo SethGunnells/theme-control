@@ -1,5 +1,5 @@
 import pc from "picocolors";
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import { join } from "path";
 import { existsSync } from "fs";
 
@@ -47,3 +47,14 @@ const log = {
     if (TC_LOG_LEVEL >= 1) console.error(`[ERROR] :: ${msg}`);
   },
 };
+
+// Check operating system
+const currentOS = platform();
+const SUPPORTED_OS = ["darwin"]; // macOS
+
+if (!SUPPORTED_OS.includes(currentOS)) {
+  log.error(
+    `Unsupported operating system: ${currentOS}. Supported operating systems: ${SUPPORTED_OS.join(", ")} (macOS)`
+  );
+  process.exit(1);
+}
