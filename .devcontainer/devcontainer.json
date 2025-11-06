@@ -1,0 +1,19 @@
+{
+  "name": "Bun Development",
+  "image": "oven/bun:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "oven.bun-vscode"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "postCreateCommand": "bun install",
+  "remoteUser": "bun"
+}
