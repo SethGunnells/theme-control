@@ -54,7 +54,7 @@ const SUPPORTED_OS = ["darwin"]; // macOS
 
 if (!SUPPORTED_OS.includes(currentOS)) {
   log.error(
-    `Unsupported operating system: ${currentOS}. Supported operating systems: ${SUPPORTED_OS.join(", ")} (macOS)`
+    `Unsupported operating system: ${currentOS}. Supported operating systems: macOS`
   );
   process.exit(1);
 }
