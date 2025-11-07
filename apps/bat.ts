@@ -5,4 +5,3 @@ import { join } from "path";
 export const DEFAULT_BAT_CONFIG_PATH = join(homedir(), ".config", "bat", "config");
 
 export const APP_NAME = "bat";
-
