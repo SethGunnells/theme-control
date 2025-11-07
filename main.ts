@@ -24,7 +24,7 @@ interface AppConfig {
 
 interface AppsConfig {
   enabled?: string[];
-  bat?: AppConfig;
+  [appName: string]: string[] | AppConfig | undefined;
 }
 
 interface Config {
@@ -55,8 +55,8 @@ function getEnabledApps(config: Config): string[] {
 
 function getAppConfigPath(config: Config, app: string): string {
   // Check if there's a custom config path for this app
-  const appConfig = config.apps?.[app as keyof AppsConfig] as AppConfig | undefined;
-  if (appConfig?.configPath) {
+  const appConfig = config.apps?.[app];
+  if (appConfig && typeof appConfig === 'object' && 'configPath' in appConfig && appConfig.configPath) {
     return appConfig.configPath;
   }
   // Return default config path
