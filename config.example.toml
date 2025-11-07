@@ -1,0 +1,17 @@
+# Example theme-control configuration file
+# Place this file at ~/.config/theme-control/config.toml
+
+# Log level: 1 (error), 2 (warn), 3 (info), 4 (debug)
+log_level = 3
+
+# Application configuration
+[apps]
+# List of enabled applications
+# If not specified, all supported applications will be checked
+enabled = ["bat"]
+
+# Bat configuration
+[apps.bat]
+# Custom config path for bat
+# Default: ~/.config/bat/config
+# configPath = "/custom/path/to/bat/config"
