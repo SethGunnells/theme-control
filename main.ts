@@ -17,12 +17,26 @@ if (!SUPPORTED_OS.includes(currentOS)) {
   process.exit(1);
 }
 
-const [appearance, theme] = process.argv.slice(2);
+// Parse command line arguments
+const args = process.argv.slice(2);
+let forceUpdateThemes = false;
+let appearance: string | undefined;
+let theme: string | undefined;
+
+// Check for --update-themes flag
+const updateThemesIndex = args.indexOf("--update-themes");
+if (updateThemesIndex !== -1) {
+  forceUpdateThemes = true;
+  args.splice(updateThemesIndex, 1);
+}
+
+[appearance, theme] = args;
 
 if (!appearance || !theme) {
-  log.error("Usage: bun run main.ts <appearance> <theme>");
+  log.error("Usage: bun run main.ts <appearance> <theme> [--update-themes]");
   log.error("  appearance: light | dark");
   log.error("  theme: (light: rosepine) | (dark: nord | rosepine)");
+  log.error("  --update-themes: Force update bat themes");
   process.exit(1);
 }
 
@@ -33,7 +47,7 @@ if (appearance !== "light" && appearance !== "dark") {
 
 try {
   assertTheme(appearance, theme);
-  await bat.updateIfEnabled(appearance, theme, config, log);
+  await bat.updateIfEnabled(appearance, theme, config, log, forceUpdateThemes);
 } catch (error) {
   log.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

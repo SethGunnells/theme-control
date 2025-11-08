@@ -24,9 +24,10 @@ You can configure which applications to manage and their config file locations i
 
 - `enabled`: Array of application names to manage. If not specified, all supported applications will be managed.
 - `<app>.configPath`: Custom path to the application's config file. If not specified, the default path will be used.
+- `<app>.themesPath`: Custom path to the application's themes directory. If not specified, the default path will be used.
 
 Currently supported applications:
-- `bat`: Default config path is `~/.config/bat/config`
+- `bat`: Default config path is `~/.config/bat/config`, default themes path is `~/.config/bat/themes/`
 
 Example:
 ```toml
@@ -35,6 +36,11 @@ enabled = ["bat"]
 
 [apps.bat]
 configPath = "/custom/path/to/bat/config"
+themesPath = "/custom/path/to/bat/themes"
 ```
+
+### Command Line Options
+
+- `--update-themes`: Force update application themes even if they already exist
 
 This project was created using `bun init` in bun v1.2.18. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
