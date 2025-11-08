@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>Rosé Pine</string>
+	<key>uuid</key>
+	<string>rose-pine-theme</string>
+	<key>author</key>
+	<string>Rosé Pine</string>
+	<key>settings</key>
+	<array>
+		<dict>
+			<key>settings</key>
+			<dict>
+				<key>background</key>
+				<string>#191724</string>
+				<key>foreground</key>
+				<string>#e0def4</string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>
