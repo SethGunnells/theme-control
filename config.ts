@@ -2,9 +2,10 @@ import { homedir } from "os";
 import { join } from "path";
 import { existsSync } from "fs";
 import {
-  DEFAULT_BAT_CONFIG_PATH,
   APP_NAME as BAT_APP_NAME,
+  resolveConfig as resolveBatConfig,
 } from "./apps/bat.ts";
+import type { BatAppConfig } from "./apps/bat.ts";
 
 declare module "bun" {
   interface Env {
@@ -20,61 +21,71 @@ const DEFAULT_CONFIG_PATH = join(
   "config.toml",
 );
 
-// Supported applications and their default config paths
 const SUPPORTED_APPS = [BAT_APP_NAME] as const;
-const DEFAULT_APP_CONFIG_PATHS: Record<string, string> = {
-  [BAT_APP_NAME]: DEFAULT_BAT_CONFIG_PATH,
-};
 
-interface AppConfig {
+interface ResolvedAppsConfig {
+  enabled: string[];
+  bat: BatAppConfig;
+}
+
+interface ResolvedConfig {
+  log_level: number;
+  apps: ResolvedAppsConfig;
+}
+
+interface PartialAppConfig {
   configPath?: string;
 }
 
-function isAppConfig(value: unknown): value is AppConfig {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-interface AppsConfig {
+interface PartialAppsConfig {
   enabled?: string[];
-  [appName: string]: string[] | AppConfig | undefined;
+  bat?: PartialAppConfig;
 }
 
-interface Config {
+interface PartialConfig {
   log_level?: number;
-  apps?: AppsConfig;
+  apps?: PartialAppsConfig;
 }
+
+const DEFAULT_LOG_LEVEL = 2;
 
 async function loadConfig(
-  configPath: string = DEFAULT_CONFIG_PATH,
-): Promise<Config> {
+  configPath: string = process.env.TC_CONFIG_PATH ?? DEFAULT_CONFIG_PATH,
+): Promise<ResolvedConfig> {
+  let partialConfig: PartialConfig = {};
+
   try {
     if (existsSync(configPath)) {
       const file = Bun.file(configPath);
       const config = await file.text();
-      return Bun.TOML.parse(config) as Config;
+      partialConfig = Bun.TOML.parse(config) as PartialConfig;
     }
   } catch (error) {
     console.error(`Failed to load config from ${configPath}:`, error);
   }
-  return {};
+
+  const enabledApps = partialConfig.apps?.enabled ?? [...SUPPORTED_APPS];
+
+  return {
+    log_level: Number(
+      process.env.TC_LOG_LEVEL ?? partialConfig.log_level ?? DEFAULT_LOG_LEVEL,
+    ),
+    apps: {
+      enabled: enabledApps,
+      bat: resolveBatConfig(partialConfig.apps?.bat),
+    },
+  };
 }
 
-function getEnabledApps(config: Config): string[] {
-  // If enabled is not specified, return all supported apps
-  if (!config.apps?.enabled) {
-    return [...SUPPORTED_APPS];
-  }
+function getEnabledApps(config: ResolvedConfig): string[] {
   return config.apps.enabled;
 }
 
-function getAppConfigPath(config: Config, app: string): string {
-  // Check if there's a custom config path for this app
-  const appConfig = config.apps?.[app];
-  if (isAppConfig(appConfig) && appConfig.configPath) {
-    return appConfig.configPath;
+function getAppConfigPath(config: ResolvedConfig, app: string): string {
+  if (app === BAT_APP_NAME) {
+    return config.apps.bat.configPath;
   }
-  // Return default config path
-  return DEFAULT_APP_CONFIG_PATHS[app] || "";
+  return "";
 }
 
 export {
@@ -82,6 +93,6 @@ export {
   getEnabledApps,
   getAppConfigPath,
   SUPPORTED_APPS,
-  DEFAULT_APP_CONFIG_PATHS,
+  DEFAULT_LOG_LEVEL,
 };
-export type { Config, AppsConfig, AppConfig };
+export type { ResolvedConfig, ResolvedAppsConfig };
