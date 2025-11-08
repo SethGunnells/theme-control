@@ -3,7 +3,9 @@ import { platform } from "os";
 import { loadConfig } from "./config.ts";
 
 const config = await loadConfig(process.env.TC_CONFIG_PATH);
-const TC_LOG_LEVEL = Number(config.log_level ?? process.env.TC_LOG_LEVEL ?? "2");
+const TC_LOG_LEVEL = Number(
+  config.log_level ?? process.env.TC_LOG_LEVEL ?? "2",
+);
 
 const log = {
   debug: (msg: string) => {
@@ -26,7 +28,7 @@ const SUPPORTED_OS = ["darwin"]; // macOS
 
 if (!SUPPORTED_OS.includes(currentOS)) {
   log.error(
-    `Unsupported operating system: ${currentOS}. Supported operating systems: macOS`
+    `Unsupported operating system: ${currentOS}. Supported operating systems: macOS`,
   );
   process.exit(1);
 }

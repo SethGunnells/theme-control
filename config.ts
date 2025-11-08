@@ -1,7 +1,10 @@
 import { homedir } from "os";
 import { join } from "path";
 import { existsSync } from "fs";
-import { DEFAULT_BAT_CONFIG_PATH, APP_NAME as BAT_APP_NAME } from "./apps/bat.ts";
+import {
+  DEFAULT_BAT_CONFIG_PATH,
+  APP_NAME as BAT_APP_NAME,
+} from "./apps/bat.ts";
 
 declare module "bun" {
   interface Env {
@@ -10,7 +13,12 @@ declare module "bun" {
   }
 }
 
-const DEFAULT_CONFIG_PATH = join(homedir(), ".config", "theme-control", "config.toml");
+const DEFAULT_CONFIG_PATH = join(
+  homedir(),
+  ".config",
+  "theme-control",
+  "config.toml",
+);
 
 // Supported applications and their default config paths
 const SUPPORTED_APPS = [BAT_APP_NAME] as const;
@@ -23,7 +31,7 @@ interface AppConfig {
 }
 
 function isAppConfig(value: unknown): value is AppConfig {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 interface AppsConfig {
@@ -36,7 +44,9 @@ interface Config {
   apps?: AppsConfig;
 }
 
-async function loadConfig(configPath: string = DEFAULT_CONFIG_PATH): Promise<Config> {
+async function loadConfig(
+  configPath: string = DEFAULT_CONFIG_PATH,
+): Promise<Config> {
   try {
     if (existsSync(configPath)) {
       const file = Bun.file(configPath);
@@ -67,5 +77,11 @@ function getAppConfigPath(config: Config, app: string): string {
   return DEFAULT_APP_CONFIG_PATHS[app] || "";
 }
 
-export { loadConfig, getEnabledApps, getAppConfigPath, SUPPORTED_APPS, DEFAULT_APP_CONFIG_PATHS };
+export {
+  loadConfig,
+  getEnabledApps,
+  getAppConfigPath,
+  SUPPORTED_APPS,
+  DEFAULT_APP_CONFIG_PATHS,
+};
 export type { Config, AppsConfig, AppConfig };
