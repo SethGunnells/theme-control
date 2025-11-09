@@ -47,7 +47,7 @@ if (appearance !== "light" && appearance !== "dark") {
 
 try {
   assertTheme(appearance, theme);
-  await bat.updateIfEnabled(appearance, theme, config, log, forceUpdateThemes);
+  await bat.updateIfEnabled(appearance, theme, { config, log, os: currentOS }, forceUpdateThemes);
 } catch (error) {
   log.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

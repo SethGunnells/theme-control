@@ -3,8 +3,7 @@ import { join } from "path";
 import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import type { Themes, ThemeMap, Appearance } from "../themes";
-import type { ResolvedConfig } from "../config";
-import type { Logger } from "../logger";
+import type { Context } from "../context";
 
 export const APP_NAME = "bat";
 
@@ -113,23 +112,22 @@ export function resolveConfig(
 export async function updateIfEnabled<A extends Appearance>(
   appearance: A,
   theme: Themes<A>,
-  config: ResolvedConfig,
-  log: Logger,
+  context: Context,
   forceUpdateThemes: boolean = false,
 ): Promise<void> {
-  if (!config.apps.enabled.includes(APP_NAME)) {
-    log.debug(`Skipping ${APP_NAME}: not enabled`);
+  if (!context.config.apps.enabled.includes(APP_NAME)) {
+    context.log.debug(`Skipping ${APP_NAME}: not enabled`);
     return;
   }
 
   // Install themes if needed
-  await installThemes(config.apps.bat.themesPath, forceUpdateThemes, log);
+  await installThemes(context.config.apps.bat.themesPath, forceUpdateThemes, context.log);
 
-  const path = config.apps.bat.configPath;
-  log.debug(`Updating ${APP_NAME} config at ${path}`);
+  const path = context.config.apps.bat.configPath;
+  context.log.debug(`Updating ${APP_NAME} config at ${path}`);
 
   const resolvedTheme = themes[appearance][theme] ?? themes[appearance].default;
-  log.debug(`Resolved theme: ${resolvedTheme}`);
+  context.log.debug(`Resolved theme: ${resolvedTheme}`);
 
   let content = "";
   if (existsSync(path)) {
@@ -142,14 +140,14 @@ export async function updateIfEnabled<A extends Appearance>(
 
   if (themePattern.test(content)) {
     content = content.replace(themePattern, newThemeLine);
-    log.debug(`Replaced existing theme in ${APP_NAME} config`);
+    context.log.debug(`Replaced existing theme in ${APP_NAME} config`);
   } else {
     content = content.trim()
       ? `${content.trim()}\n${newThemeLine}\n`
       : `${newThemeLine}\n`;
-    log.debug(`Added theme to ${APP_NAME} config`);
+    context.log.debug(`Added theme to ${APP_NAME} config`);
   }
 
   await Bun.write(path, content);
-  log.info(`✓ Updated ${APP_NAME} config`);
+  context.log.info(`✓ Updated ${APP_NAME} config`);
 }
