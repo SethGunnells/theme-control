@@ -3,14 +3,7 @@ import { join } from "path";
 import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import type { Themes, ThemeMap, Appearance } from "../themes";
-import type { ResolvedConfig } from "../config";
-import type { Logger } from "../logger";
-
-export interface Context {
-  config: ResolvedConfig;
-  log: Logger;
-  os: string;
-}
+import type { Context } from "../context";
 
 export const APP_NAME = "bat";
 
