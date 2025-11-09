@@ -15,3 +15,7 @@ enabled = ["bat"]
 # Custom config path for bat
 # Default: ~/.config/bat/config
 # configPath = "/custom/path/to/bat/config"
+
+# Custom themes path for bat
+# Default: ~/.config/bat/themes
+# themesPath = "/custom/path/to/bat/themes"

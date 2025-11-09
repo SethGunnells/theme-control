@@ -35,6 +35,7 @@ interface ResolvedConfig {
 
 interface PartialAppConfig {
   configPath?: string;
+  themesPath?: string;
 }
 
 interface PartialAppsConfig {
