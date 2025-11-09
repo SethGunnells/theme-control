@@ -1,8 +1,7 @@
 import { homedir } from "os";
-import { join, dirname } from "path";
+import { join } from "path";
 import { existsSync } from "fs";
-import { mkdir, copyFile } from "fs/promises";
-import { fileURLToPath } from "url";
+import { mkdir, writeFile } from "fs/promises";
 import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { ResolvedConfig } from "../config";
 import type { Logger } from "../logger";
@@ -12,10 +11,16 @@ export const APP_NAME = "bat";
 const DEFAULT_CONFIG_PATH = join(homedir(), ".config", "bat", "config");
 const DEFAULT_THEMES_PATH = join(homedir(), ".config", "bat", "themes");
 
-// Get the directory where this file is located
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const BUNDLED_THEMES_PATH = join(__dirname, "..", "bat-themes");
+// Import embedded theme files using Bun.file
+// These will be embedded in the compiled binary
+const rosePineTheme = await Bun.file(new URL("../bat-themes/rose-pine.tmTheme", import.meta.url)).text();
+const rosePineDawnTheme = await Bun.file(new URL("../bat-themes/rose-pine-dawn.tmTheme", import.meta.url)).text();
+
+// Embedded theme files
+const EMBEDDED_THEMES = {
+  "rose-pine.tmTheme": rosePineTheme,
+  "rose-pine-dawn.tmTheme": rosePineDawnTheme,
+};
 
 export interface BatAppConfig {
   configPath: string;
@@ -57,22 +62,16 @@ export async function installThemes(
   }
 
   // Check if themes need to be installed or updated
-  const themeFiles = ["Nord.tmTheme", "rose-pine.tmTheme", "rose-pine-dawn.tmTheme"];
   let themesUpdated = false;
 
-  for (const themeFile of themeFiles) {
-    const sourcePath = join(BUNDLED_THEMES_PATH, themeFile);
+  for (const [themeFile, themeContent] of Object.entries(EMBEDDED_THEMES)) {
     const destPath = join(themesPath, themeFile);
     const themeExists = existsSync(destPath);
 
     if (!themeExists || forceUpdate) {
-      if (existsSync(sourcePath)) {
-        log.debug(`${forceUpdate ? "Updating" : "Installing"} theme: ${themeFile}`);
-        await copyFile(sourcePath, destPath);
-        themesUpdated = true;
-      } else {
-        log.warn(`Source theme file not found: ${sourcePath}`);
-      }
+      log.debug(`${forceUpdate ? "Updating" : "Installing"} theme: ${themeFile}`);
+      await writeFile(destPath, themeContent, "utf-8");
+      themesUpdated = true;
     }
   }
 
