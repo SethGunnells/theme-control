@@ -8,7 +8,7 @@ log_level = 3
 [apps]
 # List of enabled applications
 # If not specified, all supported applications will be checked
-enabled = ["bat"]
+enabled = ["bat", "delta"]
 
 # Bat configuration
 [apps.bat]
@@ -17,5 +17,15 @@ enabled = ["bat"]
 # configPath = "/custom/path/to/bat/config"
 
 # Custom themes path for bat
+# Default: ~/.config/bat/themes
+# themesPath = "/custom/path/to/bat/themes"
+
+# Delta configuration
+[apps.delta]
+# Custom config path for delta (gitconfig file)
+# Default: ~/.gitconfig
+# configPath = "/custom/path/to/.gitconfig"
+
+# Custom themes path for delta (uses bat themes by default)
 # Default: ~/.config/bat/themes
 # themesPath = "/custom/path/to/bat/themes"
