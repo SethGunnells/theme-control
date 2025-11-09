@@ -6,6 +6,7 @@ package-lock.json
 out
 dist
 *.tgz
+theme-control
 
 # code coverage
 coverage

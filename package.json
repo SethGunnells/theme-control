@@ -3,6 +3,9 @@
   "module": "main.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "compile": "bun build main.ts --compile --outfile theme-control"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
