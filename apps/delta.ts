@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { join } from "path";
-import { installThemes } from "./bat.ts";
-import type { Themes, ThemeMap, Appearance } from "../themes";
+import { installThemes, themes } from "./bat.ts";
+import type { Themes, Appearance } from "../themes";
 import type { Context } from "../context";
 import type { Logger } from "../logger";
 
@@ -11,35 +11,17 @@ const DEFAULT_CONFIG_PATH = join(homedir(), ".gitconfig");
 
 export interface DeltaAppConfig {
   configPath: string;
-  themesPath: string;
 }
 
 interface PartialDeltaAppConfig {
   configPath?: string;
-  themesPath?: string;
 }
-
-// Delta uses the same themes as bat
-const themes: ThemeMap = {
-  light: {
-    default: "base16",
-    rosepine: "rose-pine-dawn",
-  },
-  dark: {
-    default: "base16",
-    nord: "Nord",
-    rosepine: "rose-pine",
-  },
-};
 
 export function resolveConfig(
   partialConfig?: PartialDeltaAppConfig,
-  batThemesPath?: string,
 ): DeltaAppConfig {
   return {
     configPath: partialConfig?.configPath ?? DEFAULT_CONFIG_PATH,
-    // Delta uses bat's themes by default
-    themesPath: partialConfig?.themesPath ?? batThemesPath ?? join(homedir(), ".config", "bat", "themes"),
   };
 }
 
@@ -55,7 +37,7 @@ export async function updateIfEnabled<A extends Appearance>(
   }
 
   // Install bat themes if needed (delta uses bat themes)
-  await installThemes(context.config.apps.delta.themesPath, forceUpdateThemes, context.log);
+  await installThemes(context.config.apps.bat.themesPath, forceUpdateThemes, context.log);
 
   const configPath = context.config.apps.delta.configPath;
   context.log.debug(`Updating ${APP_NAME} config at ${configPath}`);

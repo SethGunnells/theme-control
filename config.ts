@@ -47,7 +47,7 @@ interface PartialAppConfig {
 interface PartialAppsConfig {
   enabled?: string[];
   bat?: PartialAppConfig;
-  delta?: PartialAppConfig;
+  delta?: Omit<PartialAppConfig, 'themesPath'>;
 }
 
 interface PartialConfig {
@@ -74,7 +74,7 @@ async function loadConfig(
 
   const enabledApps = partialConfig.apps?.enabled ?? [...SUPPORTED_APPS];
 
-  // Resolve bat config first to pass bat themes path to delta
+  // Resolve bat config first
   const batConfig = resolveBatConfig(partialConfig.apps?.bat);
 
   return {
@@ -84,7 +84,7 @@ async function loadConfig(
     apps: {
       enabled: enabledApps,
       bat: batConfig,
-      delta: resolveDeltaConfig(partialConfig.apps?.delta, batConfig.themesPath),
+      delta: resolveDeltaConfig(partialConfig.apps?.delta),
     },
   };
 }

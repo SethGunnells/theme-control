@@ -25,7 +25,4 @@ enabled = ["bat", "delta"]
 # Custom config path for delta (gitconfig file)
 # Default: ~/.gitconfig
 # configPath = "/custom/path/to/.gitconfig"
-
-# Custom themes path for delta (uses bat themes by default)
-# Default: ~/.config/bat/themes
-# themesPath = "/custom/path/to/bat/themes"
+# Note: Delta uses bat themes, so configure themes path in [apps.bat] section

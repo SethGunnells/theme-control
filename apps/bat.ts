@@ -31,7 +31,7 @@ interface PartialBatAppConfig {
   themesPath?: string;
 }
 
-const themes: ThemeMap = {
+export const themes: ThemeMap = {
   light: {
     default: "base16",
     rosepine: "rose-pine-dawn",
