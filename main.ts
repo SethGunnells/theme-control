@@ -48,8 +48,9 @@ if (appearance !== "light" && appearance !== "dark") {
 
 try {
   assertTheme(appearance, theme);
-  await bat.updateIfEnabled(appearance, theme, { config, log, os: currentOS }, forceUpdateThemes);
-  await delta.updateIfEnabled(appearance, theme, { config, log, os: currentOS }, forceUpdateThemes);
+  const context = { config, log, os: currentOS };
+  await bat.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
+  await delta.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
 } catch (error) {
   log.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
