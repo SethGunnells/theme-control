@@ -28,15 +28,19 @@ You can configure which applications to manage and their config file locations i
 
 Currently supported applications:
 - `bat`: Default config path is `~/.config/bat/config`, default themes path is `~/.config/bat/themes/`
+- `delta`: Default config path is `~/.gitconfig` (uses bat themes)
 
 Example:
 ```toml
 [apps]
-enabled = ["bat"]
+enabled = ["bat", "delta"]
 
 [apps.bat]
 configPath = "/custom/path/to/bat/config"
 themesPath = "/custom/path/to/bat/themes"
+
+[apps.delta]
+configPath = "/custom/path/to/.gitconfig"
 ```
 
 ### Command Line Options

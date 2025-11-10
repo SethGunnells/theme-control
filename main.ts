@@ -2,6 +2,7 @@ import { platform } from "os";
 import { loadConfig } from "./config.ts";
 import { createLogger } from "./logger.ts";
 import * as bat from "./apps/bat.ts";
+import * as delta from "./apps/delta.ts";
 import { assertTheme } from "./themes.ts";
 
 const config = await loadConfig(process.env.TC_CONFIG_PATH);
@@ -47,7 +48,9 @@ if (appearance !== "light" && appearance !== "dark") {
 
 try {
   assertTheme(appearance, theme);
-  await bat.updateIfEnabled(appearance, theme, { config, log, os: currentOS }, forceUpdateThemes);
+  const context = { config, log, os: currentOS };
+  await bat.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
+  await delta.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
 } catch (error) {
   log.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

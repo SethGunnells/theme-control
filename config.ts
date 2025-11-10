@@ -6,6 +6,11 @@ import {
   resolveConfig as resolveBatConfig,
 } from "./apps/bat.ts";
 import type { BatAppConfig } from "./apps/bat.ts";
+import {
+  APP_NAME as DELTA_APP_NAME,
+  resolveConfig as resolveDeltaConfig,
+} from "./apps/delta.ts";
+import type { DeltaAppConfig } from "./apps/delta.ts";
 
 declare module "bun" {
   interface Env {
@@ -21,11 +26,12 @@ const DEFAULT_CONFIG_PATH = join(
   "config.toml",
 );
 
-const SUPPORTED_APPS = [BAT_APP_NAME] as const;
+const SUPPORTED_APPS = [BAT_APP_NAME, DELTA_APP_NAME] as const;
 
 interface ResolvedAppsConfig {
   enabled: string[];
   bat: BatAppConfig;
+  delta: DeltaAppConfig;
 }
 
 interface ResolvedConfig {
@@ -41,6 +47,7 @@ interface PartialAppConfig {
 interface PartialAppsConfig {
   enabled?: string[];
   bat?: PartialAppConfig;
+  delta?: Omit<PartialAppConfig, 'themesPath'>;
 }
 
 interface PartialConfig {
@@ -67,13 +74,17 @@ async function loadConfig(
 
   const enabledApps = partialConfig.apps?.enabled ?? [...SUPPORTED_APPS];
 
+  // Resolve bat config first
+  const batConfig = resolveBatConfig(partialConfig.apps?.bat);
+
   return {
     log_level: Number(
       process.env.TC_LOG_LEVEL ?? partialConfig.log_level ?? DEFAULT_LOG_LEVEL,
     ),
     apps: {
       enabled: enabledApps,
-      bat: resolveBatConfig(partialConfig.apps?.bat),
+      bat: batConfig,
+      delta: resolveDeltaConfig(partialConfig.apps?.delta),
     },
   };
 }
@@ -85,6 +96,9 @@ function getEnabledApps(config: ResolvedConfig): string[] {
 function getAppConfigPath(config: ResolvedConfig, app: string): string {
   if (app === BAT_APP_NAME) {
     return config.apps.bat.configPath;
+  }
+  if (app === DELTA_APP_NAME) {
+    return config.apps.delta.configPath;
   }
   return "";
 }
