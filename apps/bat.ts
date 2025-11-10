@@ -4,6 +4,7 @@ import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { Context } from "../context";
+import type { Logger } from "../logger";
 
 export const APP_NAME = "bat";
 
