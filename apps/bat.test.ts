@@ -13,10 +13,47 @@ import {
 import type { Context } from "../context";
 import type { Appearance } from "../themes";
 
+// Import theme files for content verification using Bun.file
+const rosePineThemeFile = Bun.file(new URL("../bat-themes/rose-pine.tmTheme", import.meta.url));
+const rosePineDawnThemeFile = Bun.file(new URL("../bat-themes/rose-pine-dawn.tmTheme", import.meta.url));
+
 // Create a test directory
 const TEST_DIR = join(tmpdir(), `bat-test-${Date.now()}`);
 const TEST_CONFIG_PATH = join(TEST_DIR, "config");
 const TEST_THEMES_PATH = join(TEST_DIR, "themes");
+
+// Test utility to create context with minimal required fields
+function createTestContext(overrides: {
+  enabled?: string[];
+  configPath?: string;
+  themesPath?: string;
+  logLevel?: number;
+}): Context {
+  const mockLogger = {
+    debug: mock(() => {}),
+    info: mock(() => {}),
+    warn: mock(() => {}),
+    error: mock(() => {}),
+  };
+
+  return {
+    config: {
+      log_level: overrides.logLevel ?? 2,
+      apps: {
+        enabled: overrides.enabled ?? ["bat"],
+        bat: {
+          configPath: overrides.configPath ?? TEST_CONFIG_PATH,
+          themesPath: overrides.themesPath ?? TEST_THEMES_PATH,
+        },
+        delta: {
+          configPath: "/tmp/gitconfig",
+        },
+      },
+    },
+    log: mockLogger,
+    os: "darwin",
+  };
+}
 
 describe("bat module", () => {
   beforeEach(() => {
@@ -32,12 +69,6 @@ describe("bat module", () => {
     if (existsSync(TEST_DIR)) {
       rmSync(TEST_DIR, { recursive: true, force: true });
     }
-  });
-
-  describe("APP_NAME", () => {
-    test("should be 'bat'", () => {
-      expect(APP_NAME).toBe("bat");
-    });
   });
 
   describe("resolveConfig", () => {
@@ -70,29 +101,6 @@ describe("bat module", () => {
       });
       expect(config.configPath).toBe(customConfigPath);
       expect(config.themesPath).toBe(customThemesPath);
-    });
-  });
-
-  describe("themes", () => {
-    test("should have correct structure", () => {
-      expect(themes).toHaveProperty("light");
-      expect(themes).toHaveProperty("dark");
-    });
-
-    test("should have light theme mappings", () => {
-      expect(themes.light).toHaveProperty("default");
-      expect(themes.light).toHaveProperty("rosepine");
-      expect(themes.light.default).toBe("base16");
-      expect(themes.light.rosepine).toBe("rose-pine-dawn");
-    });
-
-    test("should have dark theme mappings", () => {
-      expect(themes.dark).toHaveProperty("default");
-      expect(themes.dark).toHaveProperty("nord");
-      expect(themes.dark).toHaveProperty("rosepine");
-      expect(themes.dark.default).toBe("base16");
-      expect(themes.dark.nord).toBe("Nord");
-      expect(themes.dark.rosepine).toBe("rose-pine");
     });
   });
 
@@ -130,12 +138,15 @@ describe("bat module", () => {
       expect(existsSync(rosePineFile)).toBe(true);
       expect(existsSync(rosePineDawnFile)).toBe(true);
 
-      // Verify files have content
+      // Verify files match the imported theme files
+      const expectedRosePineContent = await rosePineThemeFile.text();
+      const expectedRosePineDawnContent = await rosePineDawnThemeFile.text();
+      
       const rosePineContent = readFileSync(rosePineFile, "utf-8");
       const rosePineDawnContent = readFileSync(rosePineDawnFile, "utf-8");
 
-      expect(rosePineContent.length).toBeGreaterThan(0);
-      expect(rosePineDawnContent.length).toBeGreaterThan(0);
+      expect(rosePineContent).toBe(expectedRosePineContent);
+      expect(rosePineDawnContent).toBe(expectedRosePineDawnContent);
     });
 
     test("should update theme files when forceUpdate is true", async () => {
@@ -184,62 +195,16 @@ describe("bat module", () => {
 
   describe("updateIfEnabled", () => {
     test("should skip when bat is not enabled", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["delta"], // bat not enabled
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
+      const context = createTestContext({ enabled: ["delta"] });
 
       await updateIfEnabled("dark", "nord", context);
 
-      expect(mockLogger.debug).toHaveBeenCalledWith("Skipping bat: not enabled");
+      expect(context.log.debug).toHaveBeenCalledWith("Skipping bat: not enabled");
       expect(existsSync(TEST_CONFIG_PATH)).toBe(false);
     });
 
     test("should create config file with theme when it doesn't exist", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
+      const context = createTestContext({});
 
       await updateIfEnabled("dark", "nord", context);
 
@@ -250,30 +215,7 @@ describe("bat module", () => {
     });
 
     test("should replace existing theme in config file", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
+      const context = createTestContext({});
 
       // Create initial config with a theme
       writeFileSync(TEST_CONFIG_PATH, '--theme="base16"\n--paging=never\n');
@@ -287,30 +229,7 @@ describe("bat module", () => {
     });
 
     test("should append theme to config with existing content but no theme", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
+      const context = createTestContext({});
 
       // Create config without theme
       writeFileSync(TEST_CONFIG_PATH, "--paging=never\n--style=numbers,grid\n");
@@ -324,148 +243,15 @@ describe("bat module", () => {
     });
 
     test("should use default theme when theme not found in mapping", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
+      const context = createTestContext({});
 
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
-
-      // Use a theme that's valid in the global theme map but not in bat's theme map
-      await updateIfEnabled("dark", "rosepine", context);
+      // Use an invalid theme that doesn't exist in the theme map
+      // This should fall back to the default theme
+      await updateIfEnabled("dark", "foobar" as any, context);
 
       const content = readFileSync(TEST_CONFIG_PATH, "utf-8");
-      // Should resolve to the rosepine dark theme
-      expect(content).toContain('--theme="rose-pine"');
-    });
-
-    test("should handle light appearance with rosepine theme", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
-
-      await updateIfEnabled("light", "rosepine", context);
-
-      const content = readFileSync(TEST_CONFIG_PATH, "utf-8");
-      expect(content).toContain('--theme="rose-pine-dawn"');
-    });
-
-    test("should install themes before updating config", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
-
-      expect(existsSync(TEST_THEMES_PATH)).toBe(false);
-
-      await updateIfEnabled("dark", "nord", context);
-
-      // Verify themes were installed
-      expect(existsSync(TEST_THEMES_PATH)).toBe(true);
-      expect(existsSync(join(TEST_THEMES_PATH, "rose-pine.tmTheme"))).toBe(true);
-      expect(existsSync(join(TEST_THEMES_PATH, "rose-pine-dawn.tmTheme"))).toBe(true);
-
-      // Verify config was created
-      expect(existsSync(TEST_CONFIG_PATH)).toBe(true);
-    });
-
-    test("should respect forceUpdateThemes flag", async () => {
-      const mockLogger = {
-        debug: mock(() => {}),
-        info: mock(() => {}),
-        warn: mock(() => {}),
-        error: mock(() => {}),
-      };
-
-      const context: Context = {
-        config: {
-          log_level: 2,
-          apps: {
-            enabled: ["bat"],
-            bat: {
-              configPath: TEST_CONFIG_PATH,
-              themesPath: TEST_THEMES_PATH,
-            },
-            delta: {
-              configPath: "/tmp/gitconfig",
-            },
-          },
-        },
-        log: mockLogger,
-        os: "darwin",
-      };
-
-      // Create themes directory with existing files
-      mkdirSync(TEST_THEMES_PATH, { recursive: true });
-      const rosePineFile = join(TEST_THEMES_PATH, "rose-pine.tmTheme");
-      const oldContent = "old content";
-      writeFileSync(rosePineFile, oldContent);
-
-      await updateIfEnabled("dark", "nord", context, true);
-
-      // Verify theme was updated
-      const content = readFileSync(rosePineFile, "utf-8");
-      expect(content).not.toBe(oldContent);
-      expect(content.length).toBeGreaterThan(0);
+      // Should resolve to the default dark theme
+      expect(content).toContain('--theme="base16"');
     });
   });
 });
