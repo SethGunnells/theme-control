@@ -4,17 +4,14 @@ import { existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { Context } from "../context";
+import rosePineTheme from "../bat-themes/rose-pine.tmTheme" with { type: "file" };
+import rosePineDawnTheme from "../bat-themes/rose-pine-dawn.tmTheme" with { type: "file" };
 import type { Logger } from "../logger";
 
 export const APP_NAME = "bat";
 
 const DEFAULT_CONFIG_PATH = join(homedir(), ".config", "bat", "config");
 const DEFAULT_THEMES_PATH = join(homedir(), ".config", "bat", "themes");
-
-// Import embedded theme files using Bun.file
-// These will be embedded in the compiled binary
-const rosePineTheme = await Bun.file(new URL("../bat-themes/rose-pine.tmTheme", import.meta.url)).text();
-const rosePineDawnTheme = await Bun.file(new URL("../bat-themes/rose-pine-dawn.tmTheme", import.meta.url)).text();
 
 // Embedded theme files
 const EMBEDDED_THEMES = {
@@ -64,12 +61,15 @@ export async function installThemes(
   // Check if themes need to be installed or updated
   let themesUpdated = false;
 
-  for (const [themeFile, themeContent] of Object.entries(EMBEDDED_THEMES)) {
+  for (const [themeFile, themePath] of Object.entries(EMBEDDED_THEMES)) {
     const destPath = join(themesPath, themeFile);
     const themeExists = existsSync(destPath);
 
     if (!themeExists || forceUpdate) {
-      log.debug(`${forceUpdate ? "Updating" : "Installing"} theme: ${themeFile}`);
+      log.debug(
+        `${forceUpdate ? "Updating" : "Installing"} theme: ${themeFile}`,
+      );
+      const themeContent = await Bun.file(themePath).text();
       await writeFile(destPath, themeContent, "utf-8");
       themesUpdated = true;
     }
@@ -83,9 +83,9 @@ export async function installThemes(
         stdout: "pipe",
         stderr: "pipe",
       });
-      
+
       const exitCode = await proc.exited;
-      
+
       if (exitCode === 0) {
         log.info("✓ Bat cache rebuilt successfully");
       } else {
@@ -93,13 +93,14 @@ export async function installThemes(
         log.warn(`Failed to rebuild bat cache: ${stderr}`);
       }
     } catch (error) {
-      log.warn(`Failed to rebuild bat cache: ${error instanceof Error ? error.message : String(error)}`);
+      log.warn(
+        `Failed to rebuild bat cache: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   } else {
     log.debug("All themes are already installed");
   }
 }
-
 
 export function resolveConfig(
   partialConfig?: PartialBatAppConfig,
@@ -122,7 +123,11 @@ export async function updateIfEnabled<A extends Appearance>(
   }
 
   // Install themes if needed
-  await installThemes(context.config.apps.bat.themesPath, forceUpdateThemes, context.log);
+  await installThemes(
+    context.config.apps.bat.themesPath,
+    forceUpdateThemes,
+    context.log,
+  );
 
   const path = context.config.apps.bat.configPath;
   context.log.debug(`Updating ${APP_NAME} config at ${path}`);
