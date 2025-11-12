@@ -5,7 +5,7 @@ import * as bat from "./apps/bat.ts";
 import * as delta from "./apps/delta.ts";
 import { assertTheme } from "./themes.ts";
 
-const config = await loadConfig(process.env.TC_CONFIG_PATH);
+const config = await loadConfig();
 const log = createLogger(config.log_level);
 
 const currentOS = platform();
