@@ -1,4 +1,4 @@
-# GitHub Copilot CLI Rules for theme-control
+# Copilot Instructions for theme-control
 
 ## Project-Specific Guidelines
 
@@ -43,3 +43,28 @@
 - Use Bun-native features when available
 - Maintain existing code style and patterns
 - Update documentation only when directly related to changes
+
+## Testing Requirements
+
+### Functional Changes
+For any change that affects functionality:
+
+1. **Run Existing Tests**: All existing tests must pass before and after changes.
+
+2. **Add New Tests**: Add tests validating new functionality.
+
+3. **Black-Box Testing**: Tests should focus on black-box style testing:
+   - Test external observable effects only
+   - Make no assumptions about internal behaviors or implementation details
+   - Focus on inputs, outputs, and side effects
+
+4. **Avoid Mocking**: Avoid mocking at all costs:
+   - Use real implementations whenever possible
+   - Test against actual file system, processes, or integrations
+   - Only use mocks when absolutely necessary (e.g., external APIs that require authentication)
+
+### Examples
+- ✅ Test that a theme change results in the correct config file contents
+- ✅ Test that running a command produces the expected output
+- ❌ Mock internal function calls to verify they were called
+- ❌ Test internal state or private methods directly
