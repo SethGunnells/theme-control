@@ -78,7 +78,9 @@ function serializeToml(obj: any, prefix = ""): string {
 
 function serializeValue(value: any): string {
   if (typeof value === "string") {
-    return `"${value.replace(/"/g, '\\"')}"`;
+    // Escape backslashes first, then quotes to prevent injection
+    const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    return `"${escaped}"`;
   } else if (typeof value === "boolean") {
     return value ? "true" : "false";
   } else if (typeof value === "number") {
