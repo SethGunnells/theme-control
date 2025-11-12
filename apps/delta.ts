@@ -3,7 +3,6 @@ import { join } from "path";
 import { installThemes, themes } from "./bat.ts";
 import type { Themes, Appearance } from "../themes";
 import type { Context } from "../context";
-import type { Logger } from "../logger";
 
 export const APP_NAME = "delta";
 
