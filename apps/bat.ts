@@ -6,7 +6,7 @@ import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { Context } from "../context";
 import rosePineTheme from "../bat-themes/rose-pine.tmTheme" with { type: "file" };
 import rosePineDawnTheme from "../bat-themes/rose-pine-dawn.tmTheme" with { type: "file" };
-import type { Logger } from "../logger";
+import { noopLogger, type Logger } from "../logger";
 
 export const APP_NAME = "bat";
 
@@ -48,7 +48,7 @@ export const themes: ThemeMap = {
 export async function installThemes(
   themesPath: string,
   forceUpdate: boolean,
-  log: Logger,
+  log: Logger = noopLogger,
 ): Promise<void> {
   log.debug(`Checking bat themes at ${themesPath}`);
 

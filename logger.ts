@@ -7,6 +7,13 @@ export interface Logger {
   error: (msg: string) => void;
 }
 
+export const noopLogger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+};
+
 export function createLogger(logLevel: number): Logger {
   return {
     debug: (msg: string) => {

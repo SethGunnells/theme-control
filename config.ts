@@ -47,10 +47,10 @@ interface PartialAppConfig {
 interface PartialAppsConfig {
   enabled?: string[];
   bat?: PartialAppConfig;
-  delta?: Omit<PartialAppConfig, 'themesPath'>;
+  delta?: Omit<PartialAppConfig, "themesPath">;
 }
 
-interface PartialConfig {
+export interface PartialConfig {
   log_level?: number;
   apps?: PartialAppsConfig;
 }
@@ -69,9 +69,15 @@ async function loadConfig(
       partialConfig = Bun.TOML.parse(config) as PartialConfig;
     }
   } catch (error) {
+    // FIXME use logger
     console.error(`Failed to load config from ${configPath}:`, error);
+    process.exit(1);
   }
 
+  return resolveConfig(partialConfig);
+}
+
+export function resolveConfig(partialConfig: PartialConfig): ResolvedConfig {
   const enabledApps = partialConfig.apps?.enabled ?? [...SUPPORTED_APPS];
 
   // Resolve bat config first

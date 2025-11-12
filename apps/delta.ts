@@ -13,7 +13,7 @@ export interface DeltaAppConfig {
   configPath: string;
 }
 
-interface PartialDeltaAppConfig {
+export interface PartialDeltaAppConfig {
   configPath?: string;
 }
 
@@ -37,7 +37,11 @@ export async function updateIfEnabled<A extends Appearance>(
   }
 
   // Install bat themes if needed (delta uses bat themes)
-  await installThemes(context.config.apps.bat.themesPath, forceUpdateThemes, context.log);
+  await installThemes(
+    context.config.apps.bat.themesPath,
+    forceUpdateThemes,
+    context.log,
+  );
 
   const configPath = context.config.apps.delta.configPath;
   context.log.debug(`Updating ${APP_NAME} config at ${configPath}`);
@@ -48,7 +52,14 @@ export async function updateIfEnabled<A extends Appearance>(
   // Use git config to set the delta syntax-theme
   try {
     const proc = Bun.spawn(
-      ["git", "config", "--file", configPath, "delta.syntax-theme", resolvedTheme],
+      [
+        "git",
+        "config",
+        "--file",
+        configPath,
+        "delta.syntax-theme",
+        resolvedTheme,
+      ],
       {
         stdout: "pipe",
         stderr: "pipe",
