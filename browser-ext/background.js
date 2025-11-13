@@ -1,15 +1,27 @@
-// Map of theme names to their file paths
+// Map of theme names and appearances to their file paths
 const THEME_FILES = {
-  nord: "themes/nord.json",
-  rosepine: "themes/rose_pine.json",
-  rosepine_dawn: "themes/rose_pine_dawn.json",
+  dark: {
+    nord: "themes/nord.json",
+    rosepine: "themes/rose_pine.json",
+  },
+  light: {
+    rosepine: "themes/rose_pine_dawn.json",
+  },
 };
 
 // Load theme from file system
-async function loadTheme(themeName) {
-  const themeFile = THEME_FILES[themeName];
+async function loadTheme(themeName, appearance) {
+  const appearanceThemes = THEME_FILES[appearance];
+  if (!appearanceThemes) {
+    console.error(`Unknown appearance: ${appearance}`);
+    return null;
+  }
+
+  const themeFile = appearanceThemes[themeName];
   if (!themeFile) {
-    console.error(`Unknown theme: ${themeName}`);
+    console.error(
+      `Unknown theme: ${themeName} for appearance: ${appearance}`
+    );
     return null;
   }
 
@@ -25,21 +37,23 @@ async function loadTheme(themeName) {
 }
 
 // Apply theme to browser
-async function applyTheme(themeName) {
-  const theme = await loadTheme(themeName);
+async function applyTheme(themeName, appearance) {
+  const theme = await loadTheme(themeName, appearance);
   if (theme) {
     await browser.theme.update(theme);
-    console.log(`Applied theme: ${themeName}`);
+    console.log(`Applied theme: ${themeName} (${appearance})`);
   }
 }
 
 // Listen for messages from native messaging host
 const port = browser.runtime.connectNative("themecontrol");
 port.onMessage.addListener(async (message) => {
-  if (message && message.theme) {
-    await applyTheme(message.theme);
+  if (message && message.theme && message.appearance) {
+    await applyTheme(message.theme, message.appearance);
   } else {
-    console.error("Invalid message format. Expected: { theme: 'themeName' }");
+    console.error(
+      "Invalid message format. Expected: { theme: 'themeName', appearance: 'light|dark' }"
+    );
   }
 });
 
@@ -51,12 +65,18 @@ port.onDisconnect.addListener(() => {
 });
 
 // Also listen for extension messages (for reload events)
-browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  if (message.action === "reloadTheme" && message.theme) {
-    await applyTheme(message.theme);
-    sendResponse({ success: true });
+browser.runtime.onMessage.addListener(
+  async (message, sender, sendResponse) => {
+    if (
+      message.action === "reloadTheme" &&
+      message.theme &&
+      message.appearance
+    ) {
+      await applyTheme(message.theme, message.appearance);
+      sendResponse({ success: true });
+    }
+    return true; // Keep message channel open for async response
   }
-  return true; // Keep message channel open for async response
-});
+);
 
 console.log("Theme Control extension initialized");

@@ -72,18 +72,22 @@ bun run main.ts light rosepine
 
 The CLI will:
 1. Update the themes for your configured applications (bat, delta, helix)
-2. Write the current theme to `~/.config/theme-control/current-theme.json`
-3. The native messaging host will detect the change and notify the extension
-4. The extension will load and apply the theme
+2. Write the current theme info (theme name, appearance, and timestamp) to `~/.config/theme-control/current-theme.json`
+3. The native messaging host will detect the change and notify the extension with both the theme name and appearance
+4. The extension will load the appropriate theme file based on the theme name and appearance, then apply it
 
 ## Supported Themes
 
+The extension maps theme names and appearances to specific theme files:
+
 - **Dark themes:**
-  - `nord`
-  - `rosepine`
+  - `nord` → `themes/nord.json`
+  - `rosepine` → `themes/rose_pine.json`
 
 - **Light themes:**
-  - `rosepine` (dawn variant)
+  - `rosepine` → `themes/rose_pine_dawn.json`
+
+Note: The same theme name (`rosepine`) maps to different files based on the appearance (light/dark).
 
 ## Troubleshooting
 

@@ -29,7 +29,7 @@ function readCurrentTheme() {
     if (fs.existsSync(THEME_FILE)) {
       const content = fs.readFileSync(THEME_FILE, 'utf-8');
       const data = JSON.parse(content);
-      return data.theme;
+      return { theme: data.theme, appearance: data.appearance };
     }
   } catch (error) {
     console.error('Error reading theme file:', error.message);
@@ -42,11 +42,11 @@ function main() {
   // Send initial theme
   const initialTheme = readCurrentTheme();
   if (initialTheme) {
-    sendMessage({ theme: initialTheme });
+    sendMessage(initialTheme);
   }
   
   // Watch for theme file changes
-  let lastTheme = initialTheme;
+  let lastTheme = initialTheme ? JSON.stringify(initialTheme) : null;
   
   // Ensure directory exists
   const themeDir = path.dirname(THEME_FILE);
@@ -58,9 +58,10 @@ function main() {
   fs.watch(themeDir, (eventType, filename) => {
     if (filename === path.basename(THEME_FILE)) {
       const currentTheme = readCurrentTheme();
-      if (currentTheme && currentTheme !== lastTheme) {
-        lastTheme = currentTheme;
-        sendMessage({ theme: currentTheme });
+      const currentThemeStr = currentTheme ? JSON.stringify(currentTheme) : null;
+      if (currentTheme && currentThemeStr !== lastTheme) {
+        lastTheme = currentThemeStr;
+        sendMessage(currentTheme);
       }
     }
   });
