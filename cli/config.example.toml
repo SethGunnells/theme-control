@@ -32,8 +32,3 @@ enabled = ["bat", "delta", "helix", "kitty"]
 # Custom config path for helix
 # Default: ~/.config/helix/config.toml
 # configPath = "/custom/path/to/helix/config.toml"
-
-# Kitty configuration
-[apps.kitty]
-# Kitty terminal emulator uses the 'kitten theme' command
-# No custom configuration needed - themes are applied globally

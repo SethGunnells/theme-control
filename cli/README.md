@@ -48,9 +48,6 @@ configPath = "/custom/path/to/.gitconfig"
 
 [apps.helix]
 configPath = "/custom/path/to/helix/config.toml"
-
-[apps.kitty]
-# Kitty has no custom configuration needed
 ```
 
 ### Command Line Options
