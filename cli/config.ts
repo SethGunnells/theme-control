@@ -16,6 +16,11 @@ import {
   resolveConfig as resolveHelixConfig,
 } from "./apps/helix.ts";
 import type { HelixAppConfig } from "./apps/helix.ts";
+import {
+  APP_NAME as KITTY_APP_NAME,
+  resolveConfig as resolveKittyConfig,
+} from "./apps/kitty.ts";
+import type { KittyAppConfig } from "./apps/kitty.ts";
 
 declare module "bun" {
   interface Env {
@@ -32,13 +37,19 @@ const DEFAULT_CONFIG_PATH = join(
   "config.toml",
 );
 
-const SUPPORTED_APPS = [BAT_APP_NAME, DELTA_APP_NAME, HELIX_APP_NAME] as const;
+const SUPPORTED_APPS = [
+  BAT_APP_NAME,
+  DELTA_APP_NAME,
+  HELIX_APP_NAME,
+  KITTY_APP_NAME,
+] as const;
 
 interface ResolvedAppsConfig {
   enabled: string[];
   bat: BatAppConfig;
   delta: DeltaAppConfig;
   helix: HelixAppConfig;
+  kitty: KittyAppConfig;
 }
 
 interface ResolvedConfig {
@@ -56,6 +67,7 @@ interface PartialAppsConfig {
   bat?: PartialAppConfig;
   delta?: Omit<PartialAppConfig, "themesPath">;
   helix?: Omit<PartialAppConfig, "themesPath">;
+  kitty?: Record<string, never>;
 }
 
 export interface PartialConfig {
@@ -100,6 +112,7 @@ export function resolveConfig(partialConfig: PartialConfig): ResolvedConfig {
       bat: batConfig,
       delta: resolveDeltaConfig(partialConfig.apps?.delta),
       helix: resolveHelixConfig(partialConfig.apps?.helix),
+      kitty: resolveKittyConfig(partialConfig.apps?.kitty),
     },
   };
 }

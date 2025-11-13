@@ -4,6 +4,7 @@ import { createLogger } from "./logger.ts";
 import * as bat from "./apps/bat.ts";
 import * as delta from "./apps/delta.ts";
 import * as helix from "./apps/helix.ts";
+import * as kitty from "./apps/kitty.ts";
 import { assertTheme } from "./themes.ts";
 
 const config = await loadConfig();
@@ -53,6 +54,7 @@ try {
   await bat.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await delta.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await helix.updateIfEnabled(appearance, theme, context);
+  await kitty.updateIfEnabled(appearance, theme, context);
 } catch (error) {
   log.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

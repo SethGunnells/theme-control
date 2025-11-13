@@ -27,13 +27,17 @@ You can configure which applications to manage and their config file locations i
 - `<app>.themesPath`: Custom path to the application's themes directory. If not specified, the default path will be used.
 
 Currently supported applications:
+
 - `bat`: Default config path is `~/.config/bat/config`, default themes path is `~/.config/bat/themes/`
 - `delta`: Default config path is `~/.gitconfig` (uses bat themes)
+- `helix`: Default config path is `~/.config/helix/config.toml`
+- `kitty`: Uses the `kitten theme` command (no config path needed)
 
 Example:
+
 ```toml
 [apps]
-enabled = ["bat", "delta"]
+enabled = ["bat", "delta", "helix", "kitty"]
 
 [apps.bat]
 configPath = "/custom/path/to/bat/config"
@@ -41,6 +45,12 @@ themesPath = "/custom/path/to/bat/themes"
 
 [apps.delta]
 configPath = "/custom/path/to/.gitconfig"
+
+[apps.helix]
+configPath = "/custom/path/to/helix/config.toml"
+
+[apps.kitty]
+# Kitty has no custom configuration needed
 ```
 
 ### Command Line Options
