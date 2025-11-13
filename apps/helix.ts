@@ -84,6 +84,8 @@ export async function updateIfEnabled<A extends Appearance>(
   context.log.info(`✓ Updated ${APP_NAME} config`);
 
   // Send USR1 signal to all running hx processes
+  if (process.env.NODE_ENV === "test") return;
+
   try {
     const proc = Bun.spawn(["pkill", "-USR1", "hx"], {
       stdout: "pipe",

@@ -21,6 +21,7 @@ declare module "bun" {
   interface Env {
     TC_LOG_LEVEL: string | undefined;
     TC_CONFIG_PATH: string | undefined;
+    NODE_ENV: string | undefined;
   }
 }
 
