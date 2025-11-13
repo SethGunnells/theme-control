@@ -4,6 +4,7 @@ import { createLogger } from "./logger.ts";
 import * as bat from "./apps/bat.ts";
 import * as delta from "./apps/delta.ts";
 import * as helix from "./apps/helix.ts";
+import * as macos from "./apps/macos.ts";
 import { assertTheme } from "./themes.ts";
 
 const config = await loadConfig();
@@ -50,6 +51,7 @@ if (appearance !== "light" && appearance !== "dark") {
 try {
   assertTheme(appearance, theme);
   const context = { config, log, os: currentOS };
+  await macos.updateIfEnabled(appearance, context);
   await bat.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await delta.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await helix.updateIfEnabled(appearance, theme, context);
