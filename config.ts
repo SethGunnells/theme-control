@@ -11,11 +11,17 @@ import {
   resolveConfig as resolveDeltaConfig,
 } from "./apps/delta.ts";
 import type { DeltaAppConfig } from "./apps/delta.ts";
+import {
+  APP_NAME as HELIX_APP_NAME,
+  resolveConfig as resolveHelixConfig,
+} from "./apps/helix.ts";
+import type { HelixAppConfig } from "./apps/helix.ts";
 
 declare module "bun" {
   interface Env {
     TC_LOG_LEVEL: string | undefined;
     TC_CONFIG_PATH: string | undefined;
+    NODE_ENV: string | undefined;
   }
 }
 
@@ -26,12 +32,13 @@ const DEFAULT_CONFIG_PATH = join(
   "config.toml",
 );
 
-const SUPPORTED_APPS = [BAT_APP_NAME, DELTA_APP_NAME] as const;
+const SUPPORTED_APPS = [BAT_APP_NAME, DELTA_APP_NAME, HELIX_APP_NAME] as const;
 
 interface ResolvedAppsConfig {
   enabled: string[];
   bat: BatAppConfig;
   delta: DeltaAppConfig;
+  helix: HelixAppConfig;
 }
 
 interface ResolvedConfig {
@@ -48,6 +55,7 @@ interface PartialAppsConfig {
   enabled?: string[];
   bat?: PartialAppConfig;
   delta?: Omit<PartialAppConfig, "themesPath">;
+  helix?: Omit<PartialAppConfig, "themesPath">;
 }
 
 export interface PartialConfig {
@@ -91,6 +99,7 @@ export function resolveConfig(partialConfig: PartialConfig): ResolvedConfig {
       enabled: enabledApps,
       bat: batConfig,
       delta: resolveDeltaConfig(partialConfig.apps?.delta),
+      helix: resolveHelixConfig(partialConfig.apps?.helix),
     },
   };
 }
@@ -105,6 +114,9 @@ function getAppConfigPath(config: ResolvedConfig, app: string): string {
   }
   if (app === DELTA_APP_NAME) {
     return config.apps.delta.configPath;
+  }
+  if (app === HELIX_APP_NAME) {
+    return config.apps.helix.configPath;
   }
   return "";
 }

@@ -8,7 +8,7 @@ log_level = 3
 [apps]
 # List of enabled applications
 # If not specified, all supported applications will be checked
-enabled = ["bat", "delta"]
+enabled = ["bat", "delta", "helix"]
 
 # Bat configuration
 [apps.bat]
@@ -26,3 +26,9 @@ enabled = ["bat", "delta"]
 # Default: ~/.gitconfig
 # configPath = "/custom/path/to/.gitconfig"
 # Note: Delta uses bat themes, so configure themes path in [apps.bat] section
+
+# Helix configuration
+[apps.helix]
+# Custom config path for helix
+# Default: ~/.config/helix/config.toml
+# configPath = "/custom/path/to/helix/config.toml"
