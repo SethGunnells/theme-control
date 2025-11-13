@@ -37,63 +37,10 @@ export function resolveConfig(
   };
 }
 
-/**
- * Simple TOML serializer for the Helix config structure
- * Handles basic types and nested objects
- */
-function serializeToml(obj: any, prefix = ""): string {
-  const lines: string[] = [];
-  const tables: string[] = [];
-
-  // First pass: serialize top-level scalar values
-  for (const [key, value] of Object.entries(obj)) {
-    if (value === null || value === undefined) {
-      continue;
-    }
-
-    const fullKey = prefix ? `${prefix}.${key}` : key;
-
-    if (typeof value === "object" && !Array.isArray(value)) {
-      // Handle nested objects as tables
-      tables.push(`[${fullKey}]`);
-      const nestedContent = serializeToml(value, "");
-      // Get only the non-table lines from nested content
-      const nestedLines = nestedContent
-        .split("\n")
-        .filter((line) => line && !line.startsWith("["));
-      tables.push(...nestedLines);
-      tables.push(""); // Empty line after table
-    } else if (Array.isArray(value)) {
-      // Handle arrays
-      const arrayStr = `[${value.map((v) => serializeValue(v)).join(", ")}]`;
-      lines.push(`${key} = ${arrayStr}`);
-    } else {
-      // Handle scalar values
-      lines.push(`${key} = ${serializeValue(value)}`);
-    }
-  }
-
-  return [...lines, ...tables].join("\n");
-}
-
-function serializeValue(value: any): string {
-  if (typeof value === "string") {
-    // Escape backslashes first, then quotes to prevent injection
-    const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    return `"${escaped}"`;
-  } else if (typeof value === "boolean") {
-    return value ? "true" : "false";
-  } else if (typeof value === "number") {
-    return String(value);
-  }
-  return String(value);
-}
-
 export async function updateIfEnabled<A extends Appearance>(
   appearance: A,
   theme: Themes<A>,
   context: Context,
-  forceUpdateThemes: boolean = false,
 ): Promise<void> {
   if (!context.config.apps.enabled.includes(APP_NAME)) {
     context.log.debug(`Skipping ${APP_NAME}: not enabled`);
@@ -119,24 +66,21 @@ export async function updateIfEnabled<A extends Appearance>(
     }
   }
 
-  // Parse existing TOML and update theme key
-  let config: any = {};
-  if (content.trim()) {
-    try {
-      config = Bun.TOML.parse(content);
-    } catch (error) {
-      context.log.warn(
-        `Failed to parse existing config, will overwrite: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+  // Simple search and replace for the theme key
+  const themePattern = /^theme\s*=\s*"[^"]*"/m;
+  const newThemeLine = `theme = "${resolvedTheme}"`;
+
+  if (themePattern.test(content)) {
+    content = content.replace(themePattern, newThemeLine);
+    context.log.debug(`Replaced existing theme in ${APP_NAME} config`);
+  } else {
+    content = content.trim()
+      ? `${newThemeLine}\n${content.trim()}\n`
+      : `${newThemeLine}\n`;
+    context.log.debug(`Added theme to ${APP_NAME} config`);
   }
 
-  // Set the theme key at top level
-  config.theme = resolvedTheme;
-
-  // Convert back to TOML - simple manual serialization
-  const newContent = serializeToml(config);
-  await Bun.write(configPath, newContent);
+  await Bun.write(configPath, content);
   context.log.info(`✓ Updated ${APP_NAME} config`);
 
   // Send USR1 signal to all running hx processes
