@@ -45,34 +45,36 @@ async function applyTheme(themeName, appearance) {
   }
 }
 
-// Listen for messages from native messaging host
-const port = browser.runtime.connectNative("themecontrol");
-port.onMessage.addListener(async (message) => {
-  if (message && message.theme && message.appearance) {
-    await applyTheme(message.theme, message.appearance);
-  } else {
-    console.error(
-      "Invalid message format. Expected: { theme: 'themeName', appearance: 'light|dark' }"
+// Check for theme updates from the native messaging host
+async function checkForThemeUpdate() {
+  try {
+    const response = await browser.runtime.sendNativeMessage(
+      "themecontrol",
+      { action: "getTheme" }
     );
-  }
-});
 
-port.onDisconnect.addListener(() => {
-  const error = browser.runtime.lastError;
-  if (error) {
-    console.error("Native messaging port disconnected:", error.message);
+    if (response && response.theme && response.appearance) {
+      await applyTheme(response.theme, response.appearance);
+    } else if (response && response.error) {
+      console.error("Error from native host:", response.error);
+    }
+  } catch (error) {
+    // Native host not available or error occurred
+    console.error("Failed to check for theme update:", error);
   }
-});
+}
 
-// Also listen for extension messages (for reload events)
+// Check for theme updates on startup
+checkForThemeUpdate();
+
+// Check for theme updates periodically (every 5 seconds)
+setInterval(checkForThemeUpdate, 5000);
+
+// Also listen for extension messages (for manual reload)
 browser.runtime.onMessage.addListener(
   async (message, sender, sendResponse) => {
-    if (
-      message.action === "reloadTheme" &&
-      message.theme &&
-      message.appearance
-    ) {
-      await applyTheme(message.theme, message.appearance);
+    if (message.action === "reloadTheme") {
+      await checkForThemeUpdate();
       sendResponse({ success: true });
     }
     return true; // Keep message channel open for async response

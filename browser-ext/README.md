@@ -5,9 +5,10 @@ This browser extension allows Firefox to automatically update its theme based on
 ## How It Works
 
 1. The extension reads theme files from its `themes/` directory
-2. The CLI writes the current theme name to `~/.config/theme-control/current-theme.json`
-3. A native messaging host monitors this file and notifies the extension when it changes
-4. The extension loads and applies the appropriate theme
+2. The CLI writes the current theme info to `~/.config/theme-control/current-theme.json`
+3. The extension periodically checks for updates by calling the native messaging host
+4. The native messaging host reads the theme file, responds with the theme info, and exits
+5. The extension loads and applies the appropriate theme
 
 ## Installation
 
@@ -73,8 +74,11 @@ bun run main.ts light rosepine
 The CLI will:
 1. Update the themes for your configured applications (bat, delta, helix)
 2. Write the current theme info (theme name, appearance, and timestamp) to `~/.config/theme-control/current-theme.json`
-3. The native messaging host will detect the change and notify the extension with both the theme name and appearance
-4. The extension will load the appropriate theme file based on the theme name and appearance, then apply it
+3. The extension will check for updates within a few seconds (it polls every 5 seconds)
+4. The native messaging host is invoked, reads the theme file, and responds to the extension
+5. The extension loads the appropriate theme file based on the theme name and appearance, then applies it
+
+**Note**: The theme update happens within 5 seconds of running the CLI. The native messaging host process does not stay alive - it's invoked by the extension, reads the file, responds, and exits.
 
 ## Supported Themes
 
@@ -102,8 +106,9 @@ Check the browser console (F12 > Console) for error messages. Common issues:
 ### Theme not updating
 
 1. Check that the CLI is writing to `~/.config/theme-control/current-theme.json`
-2. Check that the native messaging host is running (it should start automatically)
+2. Wait up to 5 seconds for the extension to check for updates (it polls periodically)
 3. Check the browser console for errors
+4. Verify the native messaging host is installed correctly
 
 ## Development
 
@@ -119,12 +124,14 @@ To test changes to the extension:
 CLI (main.ts)
     ↓ writes
 current-theme.json
-    ↓ watches
+    ↑ reads (when polled)
 Native Messaging Host (themecontrol-host.js)
-    ↓ sends message
+    ↓ responds with theme info
 Browser Extension (background.js)
     ↓ reads
 Theme Files (themes/*.json)
     ↓ applies
 Firefox Theme API
 ```
+
+The extension polls the native messaging host every 5 seconds. When invoked, the host reads the theme file, responds, and exits immediately.
