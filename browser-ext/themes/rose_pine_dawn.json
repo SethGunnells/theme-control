@@ -1,0 +1,24 @@
+{
+  "colors": {
+    "button_background_active": "#fffaf3",
+    "button_background_hover": "#fffaf3",
+    "frame": "#faf4ed",
+    "icons": "#d7827e",
+    "popup": "#f2e9e1",
+    "popup_border": "#cecacd",
+    "popup_highlight": "#dfdad9",
+    "popup_text": "#575279",
+    "sidebar": "#faf4ed",
+    "sidebar_highlight": "#dfdad9",
+    "sidebar_text": "#575279",
+    "tab_background_text": "#797593",
+    "tab_background_separator": "red",
+    "tab_selected": "#f2e9e1",
+    "tab_text": "#575279",
+    "toolbar": "#fffaf3",
+    "toolbar_field": "#f4ede8",
+    "toolbar_field_border_focus": "#907aa9",
+    "toolbar_field_highlight": "#dfdad9",
+    "toolbar_field_text": "#575279"
+  }
+}
