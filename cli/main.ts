@@ -1,4 +1,6 @@
-import { platform } from "os";
+import { platform, homedir } from "os";
+import { join } from "path";
+import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { loadConfig } from "./config.ts";
 import { createLogger } from "./logger.ts";
 import * as bat from "./apps/bat.ts";
@@ -53,6 +55,23 @@ try {
   await bat.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await delta.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await helix.updateIfEnabled(appearance, theme, context);
+  
+  // Write current theme to file for browser extension
+  const themeDir = join(homedir(), ".config", "theme-control");
+  const themeFile = join(themeDir, "current-theme.json");
+  
+  if (!existsSync(themeDir)) {
+    mkdirSync(themeDir, { recursive: true });
+  }
+  
+  const themeData = {
+    theme: theme,
+    appearance: appearance,
+    timestamp: new Date().toISOString()
+  };
+  
+  writeFileSync(themeFile, JSON.stringify(themeData, null, 2));
+  log.info(`Theme information written to ${themeFile}`);
 } catch (error) {
   log.error(error instanceof Error ? error.message : String(error));
   process.exit(1);

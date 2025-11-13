@@ -1,0 +1,9 @@
+{
+  "name": "themecontrol",
+  "description": "Theme Control Native Messaging Host",
+  "path": "/usr/local/bin/themecontrol-host",
+  "type": "stdio",
+  "allowed_extensions": [
+    "themecontrol@ext"
+  ]
+}
