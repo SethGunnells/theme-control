@@ -8,7 +8,7 @@ log_level = 3
 [apps]
 # List of enabled applications
 # If not specified, all supported applications will be checked
-enabled = ["bat", "delta", "helix", "macos"]
+enabled = ["bat", "delta", "helix"]
 
 # Bat configuration
 [apps.bat]
@@ -32,9 +32,3 @@ enabled = ["bat", "delta", "helix", "macos"]
 # Custom config path for helix
 # Default: ~/.config/helix/config.toml
 # configPath = "/custom/path/to/helix/config.toml"
-
-# macOS system appearance
-[apps.macos]
-# Enable/disable macOS system appearance changes
-# Default: true
-# enabled = true

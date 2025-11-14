@@ -1,48 +1,38 @@
 import type { Appearance } from "../themes";
 import type { Context } from "../context";
 
-export const APP_NAME = "macos";
-
-export interface MacOSAppConfig {
-  enabled: boolean;
-}
-
-interface PartialMacOSAppConfig {
-  enabled?: boolean;
-}
-
-export function resolveConfig(
-  partialConfig?: PartialMacOSAppConfig,
-): MacOSAppConfig {
-  return {
-    enabled: partialConfig?.enabled ?? true,
-  };
-}
-
-export async function updateIfEnabled<A extends Appearance>(
-  appearance: A,
+/**
+ * Updates the system appearance based on the current OS.
+ * Currently supports macOS. Other operating systems will be skipped gracefully.
+ */
+export async function updateSystemAppearance(
+  appearance: Appearance,
   context: Context,
 ): Promise<void> {
-  if (!context.config.apps.enabled.includes(APP_NAME)) {
-    context.log.debug(`Skipping ${APP_NAME}: not enabled`);
-    return;
-  }
-
-  // Only support macOS
-  if (context.os !== "darwin") {
-    context.log.debug(`Skipping ${APP_NAME}: only supported on macOS`);
-    return;
-  }
-
-  context.log.debug(`Updating ${APP_NAME} system appearance to ${appearance}`);
-
   // Skip actual system command in test environment
   if (process.env.NODE_ENV === "test") {
-    context.log.info(
-      `✓ Updated ${APP_NAME} system appearance to ${appearance}`,
-    );
+    context.log.info(`✓ Updated system appearance to ${appearance}`);
     return;
   }
+
+  // Handle based on OS
+  if (context.os === "darwin") {
+    await updateMacOSAppearance(appearance, context);
+  } else {
+    context.log.debug(
+      `System appearance update not supported on ${context.os}`,
+    );
+  }
+}
+
+/**
+ * Updates macOS system appearance using the defaults command.
+ */
+async function updateMacOSAppearance(
+  appearance: Appearance,
+  context: Context,
+): Promise<void> {
+  context.log.debug(`Updating system appearance to ${appearance}`);
 
   try {
     if (appearance === "dark") {
@@ -82,9 +72,7 @@ export async function updateIfEnabled<A extends Appearance>(
       }
     }
 
-    context.log.info(
-      `✓ Updated ${APP_NAME} system appearance to ${appearance}`,
-    );
+    context.log.info(`✓ Updated system appearance to ${appearance}`);
   } catch (error) {
     context.log.warn(
       `Failed to update system appearance: ${error instanceof Error ? error.message : String(error)}`,
