@@ -9,12 +9,6 @@ export async function updateSystemAppearance(
   appearance: Appearance,
   context: Context,
 ): Promise<void> {
-  // Skip actual system command in test environment
-  if (process.env.NODE_ENV === "test") {
-    context.log.info(`✓ Updated system appearance to ${appearance}`);
-    return;
-  }
-
   // Handle based on OS
   if (context.os === "darwin") {
     await updateMacOSAppearance(appearance, context);
