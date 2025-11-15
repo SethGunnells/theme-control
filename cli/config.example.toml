@@ -8,7 +8,7 @@ log_level = 3
 [apps]
 # List of enabled applications
 # If not specified, all supported applications will be checked
-enabled = ["bat", "delta", "helix"]
+enabled = ["bat", "delta", "helix", "kitty"]
 
 # Bat configuration
 [apps.bat]
