@@ -126,7 +126,9 @@ describe("bat module", () => {
 
   describe("updateIfEnabled", () => {
     test("should skip when bat is not enabled", async () => {
-      const context = createTestContext({ apps: { enabled: ["delta"] } });
+      const context = createTestContext({
+        apps: { enabled: ["delta"], bat: { configPath: TEST_CONFIG_PATH } },
+      });
 
       await updateIfEnabled("dark", "nord", context);
 
@@ -134,7 +136,9 @@ describe("bat module", () => {
     });
 
     test("should create config file with theme when it doesn't exist", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { bat: { configPath: TEST_CONFIG_PATH } },
+      });
 
       await updateIfEnabled("dark", "nord", context);
 
@@ -145,7 +149,9 @@ describe("bat module", () => {
     });
 
     test("should replace existing theme in config file", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { bat: { configPath: TEST_CONFIG_PATH } },
+      });
 
       // Create initial config with a theme
       writeFileSync(TEST_CONFIG_PATH, '--theme="base16"\n--paging=never\n');
@@ -159,7 +165,9 @@ describe("bat module", () => {
     });
 
     test("should append theme to config with existing content but no theme", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { bat: { configPath: TEST_CONFIG_PATH } },
+      });
 
       // Create config without theme
       writeFileSync(TEST_CONFIG_PATH, "--paging=never\n--style=numbers,grid\n");
@@ -173,7 +181,9 @@ describe("bat module", () => {
     });
 
     test("should use default theme when theme not found in mapping", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { bat: { configPath: TEST_CONFIG_PATH } },
+      });
 
       // Use an invalid theme that doesn't exist in the theme map
       // This should fall back to the default theme
