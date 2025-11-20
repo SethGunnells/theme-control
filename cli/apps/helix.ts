@@ -4,6 +4,7 @@ import { existsSync } from "fs";
 import { mkdir } from "fs/promises";
 import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { Context } from "../context";
+import { $ } from "bun";
 
 export const APP_NAME = "helix";
 
@@ -87,12 +88,7 @@ export async function updateIfEnabled<A extends Appearance>(
   if (process.env.NODE_ENV === "test") return;
 
   try {
-    const proc = Bun.spawn(["pkill", "-USR1", "hx"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
-
-    const exitCode = await proc.exited;
+    const { exitCode } = await $`pkill -USR1 hx`;
 
     if (exitCode === 0) {
       context.log.debug("Sent USR1 signal to hx processes");

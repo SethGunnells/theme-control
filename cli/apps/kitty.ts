@@ -1,5 +1,6 @@
 import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { Context } from "../context";
+import { $ } from "bun";
 
 export const APP_NAME = "kitty";
 
@@ -32,20 +33,12 @@ export async function updateIfEnabled<A extends Appearance>(
 
   try {
     // Use kitten theme command to change the theme
-    const proc = Bun.spawn(
-      ["kitten", "theme", resolvedTheme, "--reload-in=all"],
-      {
-        stdout: "pipe",
-        stderr: "pipe",
-      },
-    );
-
-    const exitCode = await proc.exited;
+    const { stderr, exitCode } =
+      await $`kitten theme ${resolvedTheme} --reload-in=all`;
 
     if (exitCode !== 0) {
-      const stderr = await new Response(proc.stderr).text();
       throw new Error(
-        `kitten theme command failed with exit code ${exitCode}: ${stderr}`,
+        `kitten theme command failed with exit code ${exitCode}: ${stderr.toString()}`,
       );
     }
 
