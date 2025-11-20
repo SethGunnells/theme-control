@@ -1,9 +1,8 @@
-import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { existsSync, mkdirSync, rmSync, writeFileSync, readFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { resolveConfig, updateIfEnabled } from "./delta";
-import type { Context } from "../context";
 import { createTestContext } from "../tests/utils";
 
 // Create a test directory
@@ -42,7 +41,9 @@ describe("delta module", () => {
 
   describe("updateIfEnabled", () => {
     test("should skip when delta is not enabled", async () => {
-      const context = createTestContext({ apps: { enabled: [] } });
+      const context = createTestContext({
+        apps: { enabled: [], delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       await updateIfEnabled("dark", "nord", context);
 
@@ -50,7 +51,9 @@ describe("delta module", () => {
     });
 
     test("should create git config with delta theme when it doesn't exist", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       await updateIfEnabled("dark", "nord", context);
 
@@ -62,7 +65,9 @@ describe("delta module", () => {
     });
 
     test("should set delta.syntax-theme to resolved theme", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       await updateIfEnabled("dark", "rosepine", context);
 
@@ -72,7 +77,9 @@ describe("delta module", () => {
     });
 
     test("should update existing delta.syntax-theme in git config", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       // Create initial config with a theme
       writeFileSync(TEST_CONFIG_PATH, "[delta]\n\tsyntax-theme = base16\n");
@@ -85,7 +92,9 @@ describe("delta module", () => {
     });
 
     test("should use default theme when theme not found in mapping", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       // Use an invalid theme that doesn't exist in the theme map
       // This should fall back to the default theme
@@ -97,7 +106,9 @@ describe("delta module", () => {
     });
 
     test("should use light theme for light appearance", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       await updateIfEnabled("light", "rosepine", context);
 
@@ -106,7 +117,12 @@ describe("delta module", () => {
     });
 
     test("should install bat themes when updating delta", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: {
+          delta: { configPath: TEST_CONFIG_PATH },
+          bat: { themesPath: TEST_THEMES_PATH },
+        },
+      });
 
       await updateIfEnabled("dark", "nord", context);
 
@@ -122,7 +138,12 @@ describe("delta module", () => {
     });
 
     test("should force update themes when forceUpdateThemes is true", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: {
+          delta: { configPath: TEST_CONFIG_PATH },
+          bat: { themesPath: TEST_THEMES_PATH },
+        },
+      });
 
       // Create themes directory with old content
       mkdirSync(TEST_THEMES_PATH, { recursive: true });
@@ -137,7 +158,9 @@ describe("delta module", () => {
     });
 
     test("should preserve existing git config sections", async () => {
-      const context = createTestContext();
+      const context = createTestContext({
+        apps: { delta: { configPath: TEST_CONFIG_PATH } },
+      });
 
       // Create config with other sections
       writeFileSync(

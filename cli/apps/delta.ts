@@ -1,8 +1,10 @@
 import { homedir } from "os";
 import { join } from "path";
+import { existsSync } from "fs";
 import { installThemes, themes } from "./bat.ts";
 import type { Themes, Appearance } from "../themes";
 import type { Context } from "../context";
+import { $ } from "bun";
 
 export const APP_NAME = "delta";
 
@@ -45,33 +47,25 @@ export async function updateIfEnabled<A extends Appearance>(
   const configPath = context.config.apps.delta.configPath;
   context.log.debug(`Updating ${APP_NAME} config at ${configPath}`);
 
+  // Create empty file if it doesn't exist
+  if (!existsSync(configPath)) {
+    context.log.debug(`Creating config file at ${configPath}`);
+    await Bun.write(configPath, "");
+  }
+
   const resolvedTheme = themes[appearance][theme] ?? themes[appearance].default;
   context.log.debug(`Resolved theme: ${resolvedTheme}`);
 
   // Use git config to set the delta syntax-theme
   try {
-    const proc = Bun.spawn(
-      [
-        "git",
-        "config",
-        "--file",
-        configPath,
-        "delta.syntax-theme",
-        resolvedTheme,
-      ],
-      {
-        stdout: "pipe",
-        stderr: "pipe",
-      },
-    );
-
-    const exitCode = await proc.exited;
+    const { stderr, exitCode } =
+      await $`git config --file ${configPath} delta.syntax-theme ${resolvedTheme}`;
 
     if (exitCode === 0) {
       context.log.info(`✓ Updated ${APP_NAME} config`);
     } else {
-      const stderr = await new Response(proc.stderr).text();
-      context.log.error(`Failed to update ${APP_NAME} config: ${stderr}`);
+      const stderrText = stderr.toString();
+      context.log.error(`Failed to update ${APP_NAME} config: ${stderrText}`);
     }
   } catch (error) {
     context.log.error(

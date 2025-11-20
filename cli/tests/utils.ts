@@ -10,7 +10,7 @@ export function createTestContext(overrides: PartialConfig = {}): Context {
       debug: () => {},
       info: () => {},
       warn: () => {},
-      error: () => {},
+      error: (msg) => console.error(msg),
     },
     os: "darwin",
   };
