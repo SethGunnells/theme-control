@@ -22,7 +22,6 @@ declare module "bun" {
   interface Env {
     TC_LOG_LEVEL: string | undefined;
     TC_CONFIG_PATH: string | undefined;
-    NODE_ENV: string | undefined;
   }
 }
 
@@ -33,15 +32,18 @@ const DEFAULT_CONFIG_PATH = join(
   "config.toml",
 );
 
+const supportedBrowsers = ["Firefox Developer Edition"] as const;
+
 const SUPPORTED_APPS = [
   BAT_APP_NAME,
   DELTA_APP_NAME,
   HELIX_APP_NAME,
   KITTY_APP_NAME,
+  ...supportedBrowsers,
 ] as const;
 
 interface ResolvedAppsConfig {
-  enabled: string[];
+  enabled: (typeof SUPPORTED_APPS)[number][];
   bat: BatAppConfig;
   delta: DeltaAppConfig;
   helix: HelixAppConfig;
@@ -58,7 +60,7 @@ interface PartialAppConfig {
 }
 
 interface PartialAppsConfig {
-  enabled?: string[];
+  enabled?: (typeof SUPPORTED_APPS)[number][];
   bat?: PartialAppConfig;
   delta?: Omit<PartialAppConfig, "themesPath">;
   helix?: Omit<PartialAppConfig, "themesPath">;

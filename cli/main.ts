@@ -7,6 +7,7 @@ import * as helix from "./apps/helix.ts";
 import * as kitty from "./apps/kitty.ts";
 import { assertTheme } from "./themes.ts";
 import { updateSystemAppearance } from "./utils/system-appearance.ts";
+import { installNativeManifest, update } from "./browsers/browsers.ts";
 
 const config = await loadConfig();
 const log = createLogger(config.log_level);
@@ -52,7 +53,9 @@ if (appearance !== "light" && appearance !== "dark") {
 try {
   assertTheme(appearance, theme);
   const context = { config, log, os: currentOS };
+  await installNativeManifest();
   await updateSystemAppearance(appearance, context);
+  await update(appearance, theme, context);
   await bat.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await delta.updateIfEnabled(appearance, theme, context, forceUpdateThemes);
   await helix.updateIfEnabled(appearance, theme, context);

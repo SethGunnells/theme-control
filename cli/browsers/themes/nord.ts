@@ -1,0 +1,27 @@
+import type { Appearance } from "../../themes.ts";
+import type { ThemeColors } from "./themes.ts";
+
+export default {
+  dark: {
+    button_background_active: "#4c566a",
+    button_background_hover: "#4c566a",
+    frame: "#2e3440",
+    icons: "#88c0d0",
+    popup: "#434c5e",
+    popup_border: "#4c566a",
+    popup_highlight: "#5e81ac",
+    popup_text: "#d8dee9",
+    sidebar: "#2e3440",
+    sidebar_highlight: "#5e81ac",
+    sidebar_text: "#d8dee9",
+    tab_background_text: "#d8dee9",
+    tab_background_separator: "#3b4252",
+    tab_selected: "#434c5e",
+    tab_text: "#88c0d0",
+    toolbar: "#3b4252",
+    toolbar_field: "#4c566a",
+    toolbar_field_border_focus: "#88c0d0",
+    toolbar_field_highlight: "#5e81ac",
+    toolbar_field_text: "#d8dee9",
+  },
+} satisfies Partial<Record<Appearance, ThemeColors>>;

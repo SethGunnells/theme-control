@@ -1,0 +1,13 @@
+{
+  "name": "native",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "compile": "bun build ./theme-control.ts --compile --outfile theme-control-helper"
+  }
+}
