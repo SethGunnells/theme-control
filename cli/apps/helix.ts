@@ -6,8 +6,6 @@ import type { Themes, ThemeMap, Appearance } from "../themes";
 import type { Context } from "../context";
 import { $ } from "bun";
 
-export const APP_NAME = "helix";
-
 const DEFAULT_CONFIG_PATH = join(homedir(), ".config", "helix", "config.toml");
 
 export interface HelixAppConfig {
@@ -43,13 +41,13 @@ export async function updateIfEnabled<A extends Appearance>(
   theme: Themes<A>,
   context: Context,
 ): Promise<void> {
-  if (!context.config.apps.enabled.includes(APP_NAME)) {
-    context.log.debug(`Skipping ${APP_NAME}: not enabled`);
+  if (!context.config.apps.enabled.includes("helix")) {
+    context.log.debug("Skipping helix: not enabled");
     return;
   }
 
   const configPath = context.config.apps.helix.configPath;
-  context.log.debug(`Updating ${APP_NAME} config at ${configPath}`);
+  context.log.debug(`Updating helix config at ${configPath}`);
 
   const resolvedTheme = themes[appearance][theme] ?? themes[appearance].default;
   context.log.debug(`Resolved theme: ${resolvedTheme}`);
@@ -73,16 +71,16 @@ export async function updateIfEnabled<A extends Appearance>(
 
   if (themePattern.test(content)) {
     content = content.replace(themePattern, newThemeLine);
-    context.log.debug(`Replaced existing theme in ${APP_NAME} config`);
+    context.log.debug("Replaced existing theme in helix config");
   } else {
     content = content.trim()
       ? `${newThemeLine}\n${content.trim()}\n`
       : `${newThemeLine}\n`;
-    context.log.debug(`Added theme to ${APP_NAME} config`);
+    context.log.debug("Added theme to helix config");
   }
 
   await Bun.write(configPath, content);
-  context.log.info(`✓ Updated ${APP_NAME} config`);
+  context.log.info("✓ Updated helix config");
 
   // Send USR1 signal to all running hx processes
   if (process.env.NODE_ENV === "test") return;

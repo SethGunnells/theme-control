@@ -8,8 +8,6 @@ import rosePineTheme from "../bat-themes/rose-pine.tmTheme" with { type: "file" 
 import rosePineDawnTheme from "../bat-themes/rose-pine-dawn.tmTheme" with { type: "file" };
 import { noopLogger, type Logger } from "../logger";
 
-export const APP_NAME = "bat";
-
 const DEFAULT_CONFIG_PATH = join(homedir(), ".config", "bat", "config");
 const DEFAULT_THEMES_PATH = join(homedir(), ".config", "bat", "themes");
 
@@ -117,8 +115,8 @@ export async function updateIfEnabled<A extends Appearance>(
   context: Context,
   forceUpdateThemes: boolean = false,
 ): Promise<void> {
-  if (!context.config.apps.enabled.includes(APP_NAME)) {
-    context.log.debug(`Skipping ${APP_NAME}: not enabled`);
+  if (!context.config.apps.enabled.includes("bat")) {
+    context.log.debug("Skipping bat: not enabled");
     return;
   }
 
@@ -130,7 +128,7 @@ export async function updateIfEnabled<A extends Appearance>(
   );
 
   const path = context.config.apps.bat.configPath;
-  context.log.debug(`Updating ${APP_NAME} config at ${path}`);
+  context.log.debug(`Updating bat config at ${path}`);
 
   const resolvedTheme = themes[appearance][theme] ?? themes[appearance].default;
   context.log.debug(`Resolved theme: ${resolvedTheme}`);
@@ -146,14 +144,14 @@ export async function updateIfEnabled<A extends Appearance>(
 
   if (themePattern.test(content)) {
     content = content.replace(themePattern, newThemeLine);
-    context.log.debug(`Replaced existing theme in ${APP_NAME} config`);
+    context.log.debug("Replaced existing theme in bat config");
   } else {
     content = content.trim()
       ? `${content.trim()}\n${newThemeLine}\n`
       : `${newThemeLine}\n`;
-    context.log.debug(`Added theme to ${APP_NAME} config`);
+    context.log.debug("Added theme to bat config");
   }
 
   await Bun.write(path, content);
-  context.log.info(`✓ Updated ${APP_NAME} config`);
+  context.log.info("✓ Updated bat config");
 }

@@ -1,22 +1,12 @@
 import { homedir } from "os";
 import { join } from "path";
 import { existsSync } from "fs";
-import {
-  APP_NAME as BAT_APP_NAME,
-  resolveConfig as resolveBatConfig,
-} from "./apps/bat.ts";
+import { resolveConfig as resolveBatConfig } from "./apps/bat.ts";
 import type { BatAppConfig } from "./apps/bat.ts";
-import {
-  APP_NAME as DELTA_APP_NAME,
-  resolveConfig as resolveDeltaConfig,
-} from "./apps/delta.ts";
+import { resolveConfig as resolveDeltaConfig } from "./apps/delta.ts";
 import type { DeltaAppConfig } from "./apps/delta.ts";
-import {
-  APP_NAME as HELIX_APP_NAME,
-  resolveConfig as resolveHelixConfig,
-} from "./apps/helix.ts";
+import { resolveConfig as resolveHelixConfig } from "./apps/helix.ts";
 import type { HelixAppConfig } from "./apps/helix.ts";
-import { APP_NAME as KITTY_APP_NAME } from "./apps/kitty.ts";
 
 declare module "bun" {
   interface Env {
@@ -35,15 +25,17 @@ const DEFAULT_CONFIG_PATH = join(
 const supportedBrowsers = ["Firefox Developer Edition"] as const;
 
 const SUPPORTED_APPS = [
-  BAT_APP_NAME,
-  DELTA_APP_NAME,
-  HELIX_APP_NAME,
-  KITTY_APP_NAME,
+  "bat",
+  "delta",
+  "helix",
+  "kitty",
   ...supportedBrowsers,
 ] as const;
 
+type SupportedApp = (typeof SUPPORTED_APPS)[number];
+
 interface ResolvedAppsConfig {
-  enabled: (typeof SUPPORTED_APPS)[number][];
+  enabled: SupportedApp[];
   bat: BatAppConfig;
   delta: DeltaAppConfig;
   helix: HelixAppConfig;
@@ -60,7 +52,7 @@ interface PartialAppConfig {
 }
 
 interface PartialAppsConfig {
-  enabled?: (typeof SUPPORTED_APPS)[number][];
+  enabled?: SupportedApp[];
   bat?: PartialAppConfig;
   delta?: Omit<PartialAppConfig, "themesPath">;
   helix?: Omit<PartialAppConfig, "themesPath">;
@@ -116,14 +108,14 @@ function getEnabledApps(config: ResolvedConfig): string[] {
   return config.apps.enabled;
 }
 
-function getAppConfigPath(config: ResolvedConfig, app: string): string {
-  if (app === BAT_APP_NAME) {
+function getAppConfigPath(config: ResolvedConfig, app: SupportedApp): string {
+  if (app === "bat") {
     return config.apps.bat.configPath;
   }
-  if (app === DELTA_APP_NAME) {
+  if (app === "delta") {
     return config.apps.delta.configPath;
   }
-  if (app === HELIX_APP_NAME) {
+  if (app === "helix") {
     return config.apps.helix.configPath;
   }
   return "";

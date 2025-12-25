@@ -6,8 +6,6 @@ import type { Themes, Appearance } from "../themes";
 import type { Context } from "../context";
 import { $ } from "bun";
 
-export const APP_NAME = "delta";
-
 const DEFAULT_CONFIG_PATH = join(homedir(), ".gitconfig");
 
 export interface DeltaAppConfig {
@@ -32,8 +30,8 @@ export async function updateIfEnabled<A extends Appearance>(
   context: Context,
   forceUpdateThemes: boolean = false,
 ): Promise<void> {
-  if (!context.config.apps.enabled.includes(APP_NAME)) {
-    context.log.debug(`Skipping ${APP_NAME}: not enabled`);
+  if (!context.config.apps.enabled.includes("delta")) {
+    context.log.debug(`Skipping delta: not enabled`);
     return;
   }
 
@@ -45,7 +43,7 @@ export async function updateIfEnabled<A extends Appearance>(
   );
 
   const configPath = context.config.apps.delta.configPath;
-  context.log.debug(`Updating ${APP_NAME} config at ${configPath}`);
+  context.log.debug(`Updating delta config at ${configPath}`);
 
   // Create empty file if it doesn't exist
   if (!existsSync(configPath)) {
@@ -62,14 +60,14 @@ export async function updateIfEnabled<A extends Appearance>(
       await $`git config --file ${configPath} delta.syntax-theme ${resolvedTheme}`;
 
     if (exitCode === 0) {
-      context.log.info(`✓ Updated ${APP_NAME} config`);
+      context.log.info("✓ Updated delta config");
     } else {
       const stderrText = stderr.toString();
-      context.log.error(`Failed to update ${APP_NAME} config: ${stderrText}`);
+      context.log.error(`Failed to update delta config: ${stderrText}`);
     }
   } catch (error) {
     context.log.error(
-      `Failed to update ${APP_NAME} config: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to update delta config: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
